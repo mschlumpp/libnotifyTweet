@@ -6,7 +6,9 @@ from tweepy import OAuthHandler, Stream
 import notify2
 import json
 import ConfigParser
+import sys
 import os
+import time
 
 class LibNotifyListener(StreamListener):
     def on_data(self, data):
@@ -26,8 +28,17 @@ if __name__ == "__main__":
 
     notify2.init(cfg.get("libnotifyTweet", "appname"))
     l = LibNotifyListener()
-    auth = OAuthHandler(cfg.get("libnotifyTweet", "consumer_key"), cfg.get("libnotifyTweet", "consumer_secret"))
-    auth.set_access_token(cfg.get("libnotifyTweet", "access_token"), cfg.get("libnotifyTweet", "access_token_secret"))
+    while True:
+        try:
+            auth = OAuthHandler(cfg.get("libnotifyTweet", "consumer_key"), cfg.get("libnotifyTweet", "consumer_secret"))
+            auth.set_access_token(cfg.get("libnotifyTweet", "access_token"), cfg.get("libnotifyTweet", "access_token_secret"))
 
-    stream = Stream(auth, l)
-    stream.userstream()
+            stream = Stream(auth, l)
+            stream.userstream()
+        except KeyboardInterrupt:
+            print "Keyboard interrupt..."
+            break
+        except:
+            print "Unexpected error:", sys.exc_info()[0]
+
+        time.sleep(3)
